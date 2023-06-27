@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <style>
+        .container {
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-right: auto;
+            margin-left: auto;
+            width: 750px;
+        }
+
+        li {
+            list-style: none;
+            margin: 0 auto 20px auto;
+            padding: 15px;
+            width: 200px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .other-message {
+            background: limegreen;
+            color: #fff;
+        }
+
+        .my-message {
+            background: darkgrey;
+            color: #fff;
+        }
+
+        .info-message {
+            background: mediumaquamarine;
+            color: #fff;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 1rem;
+            margin-top: 60px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #join-button {
+            background: lime;
+            color: black;
+        }
+
+        #leave-button {
+            background: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="room" class="hidden">
+        <div id="messages">
+            <ul>
+            </ul>
+        </div>
+        <div class="controls">
+            <input id="message-input" placeholder="add message">
+            <button id="send-button">send message</button>
+            <button id="leave-button">Leave room</button>
+        </div>
+    </div>
+
+    <div id="room-select" class="controls">
+        <input id="room-input" placeholder="select room">
+        <button id="join-button">Join Room</button>
+    </div>
+</div>
+
+<script type="module">
+    import {io} from "https://cdn.socket.io/4.3.2/socket.io.esm.min.js";
+
+    const myUsername = "jsmith";
+    let room;
+    const socket = io("http://127.0.0.1:5000");
+    socket.on('join', function (value) {
+        document.getElementById("messages").innerHTML += `<li class='info-message'>${value.username} joined the room.</li>`;
+    })
+    socket.on('leave', function (value) {
+        document.getElementById("messages").innerHTML += `<li class='info-message'>${value.username} left the room.</li>`;
+    })
+    socket.on('message', function (value) {
+        const {username, message} = value;
+        const css = username === myUsername ? "my-message" : "other-message";
+        document.getElementById("messages").innerHTML += `<li class=${css}>${message}</li>`;
+    })
+
+    document.getElementById("send-button").addEventListener("click", () => {
+        const message = document.getElementById("message-input").value;
+        document.getElementById("message-input").value = "";
+        socket.emit("message", {"username": myUsername, "message": message, "room": room});
+    })
+
+    document.getElementById("join-button").addEventListener("click", () => {
+        room = document.getElementById("room-input").value;
+        document.getElementById("room-input").value = "";
+        socket.emit("join", {"username": myUsername, "room": room});
+        document.getElementById("room").classList.remove("hidden");
+        document.getElementById("room-select").classList.add("hidden");
+    })
+
+    document.getElementById("leave-button").addEventListener("click", () => {
+        socket.emit("leave", {"username": myUsername, "room": room});
+        document.getElementById("room").classList.add("hidden");
+        document.getElementById("room-select").classList.remove("hidden");
+    })
+</script>
+</body>
+</html>
