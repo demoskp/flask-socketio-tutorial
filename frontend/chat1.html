@@ -60,19 +60,18 @@
 </head>
 <body>
 <div class="container">
-    <div id="room" class="hidden">
+    <div class="hidden" id="room">
         <div id="messages">
-            <ul>
-            </ul>
+            <ul></ul>
         </div>
         <div class="controls">
             <input id="message-input" placeholder="add message">
-            <button id="send-button">send message</button>
+            <button id="send-button">Send message</button>
             <button id="leave-button">Leave room</button>
         </div>
     </div>
 
-    <div id="room-select" class="controls">
+    <div class="controls" id="room-select">
         <input id="room-input" placeholder="select room">
         <button id="join-button">Join Room</button>
     </div>
@@ -81,47 +80,50 @@
 <script type="module">
     import {io} from "https://cdn.socket.io/4.3.2/socket.io.esm.min.js";
 
-    const myUsername = "jsmith";
     let room;
+    const myUsername = "jsmith";
+
     const socket = io(
-        "http://127.0.0.1:5555",
-        {
+        "http://127.0.0.1:5555", {
             auth: {
                 token: "123"
-            },
+            }
         }
     );
-    socket.on('join', function (value) {
-        document.getElementById("messages").innerHTML += `<li class='info-message'>${value.username} joined the room.</li>`;
-    })
-    socket.on('leave', function (value) {
-        document.getElementById("messages").innerHTML += `<li class='info-message'>${value.username} left the room.</li>`;
-    })
-    socket.on('message', function (value) {
+
+    socket.on("join", function (value) {
+        document.getElementById("messages").innerHTML += `<li class="info-message">${value.username} joined the room</li>`;
+    });
+
+    socket.on("leave", function (value) {
+        document.getElementById("messages").innerHTML += `<li class="info-message">${value.username} left the room</li>`;
+    });
+
+    socket.on("message", function (value) {
         const {username, message} = value;
         const css = username === myUsername ? "my-message" : "other-message";
         document.getElementById("messages").innerHTML += `<li class=${css}>${message}</li>`;
-    })
+    });
 
-    document.getElementById("send-button").addEventListener("click", () => {
+    document.getElementById("send-button").addEventListener("click", function () {
         const message = document.getElementById("message-input").value;
         document.getElementById("message-input").value = "";
         socket.emit("message", {"username": myUsername, "message": message, "room": room});
-    })
+    });
 
-    document.getElementById("join-button").addEventListener("click", () => {
+    document.getElementById("join-button").addEventListener("click", function () {
         room = document.getElementById("room-input").value;
         document.getElementById("room-input").value = "";
         socket.emit("join", {"username": myUsername, "room": room});
         document.getElementById("room").classList.remove("hidden");
         document.getElementById("room-select").classList.add("hidden");
-    })
+    });
 
-    document.getElementById("leave-button").addEventListener("click", () => {
+    document.getElementById("leave-button").addEventListener("click", function () {
         socket.emit("leave", {"username": myUsername, "room": room});
         document.getElementById("room").classList.add("hidden");
         document.getElementById("room-select").classList.remove("hidden");
-    })
+    });
 </script>
 </body>
 </html>
