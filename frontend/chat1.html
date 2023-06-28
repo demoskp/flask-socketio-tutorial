@@ -83,7 +83,14 @@
 
     const myUsername = "jsmith";
     let room;
-    const socket = io("http://127.0.0.1:5000");
+    const socket = io(
+        "http://127.0.0.1:5555",
+        {
+            auth: {
+                token: "123"
+            },
+        }
+    );
     socket.on('join', function (value) {
         document.getElementById("messages").innerHTML += `<li class='info-message'>${value.username} joined the room.</li>`;
     })

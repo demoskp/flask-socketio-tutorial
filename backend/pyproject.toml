@@ -9,7 +9,6 @@ python = "^3.11"
 Flask = "^2.2.3"
 python-dotenv = "^1.0.0"
 flask-socketio = "^5.3.4"
-flask-cors = "^4.0.0"
 simple-websocket = "^0.10.1"
 
 [tool.poetry.dev-dependencies]

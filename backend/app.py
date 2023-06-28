@@ -5,12 +5,14 @@ from extensions import socketio
 
 app = Flask(__name__)
 app.config.from_object("config")
-socketio.init_app(app, cors_allowed_origins="*")
+socketio.init_app(app)
 
 
 @socketio.on('connect')
-def test_connect(auth):
-    emit('my response', {'data': 'Connected'})
+def connect(auth):
+    print(auth)
+    if auth.get("token") != "123":
+        raise ConnectionRefusedError('unauthorized!')
 
 
 @socketio.on('message')
@@ -39,4 +41,4 @@ def on_leave(data):
 
 
 if __name__ == "__main__":
-    socketio.run(app=app, debug=app.config.get("FLASK_DEBUG"))
+    socketio.run(app=app, debug=app.config.get("FLASK_DEBUG"), host="0.0.0.0", port=5555)
